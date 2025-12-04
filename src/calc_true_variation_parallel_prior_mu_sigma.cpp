@@ -71,7 +71,8 @@ int main (int argc, char** argv){
 	// count per gene and per cell
     double **n_c = new double *[G];
     for(g=0;g<G;++g){
-        n_c[g] = new double [C];
+        // n_c[g] = new double [C];
+		n_c[g] = new double[C]();
 		n[g] = 0;
 	}
 	// Gene and cell names

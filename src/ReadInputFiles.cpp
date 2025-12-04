@@ -242,7 +242,8 @@ void ReadMTX(string mtx_file, string gene_name_file, string cell_name_file, doub
 	char ss[1024];
 	char * retval = NULL;
 	char * token = NULL;
-	int g,c,count,tmp;
+	int g,c,tmp;
+    double count;
 
 	// Read gene_names
 	if ( gene_name_file != "none" ){
