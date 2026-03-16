@@ -4,6 +4,13 @@ CFLAGS= -I. -O2 -ffast-math -O3 -fopenmp -std=c++11
 Sanity: calc_true_variation_parallel_prior_mu_sigma.o ReadInputFiles.o FitFrac.o FukushimaLambertW.o Digamma_Trigamma.o
 	$(CC) $(CFLAGS) -o ../bin/Sanity calc_true_variation_parallel_prior_mu_sigma.o ReadInputFiles.o FitFrac.o FukushimaLambertW.o Digamma_Trigamma.o
 
+Sanity_lib: CFLAGS += -fPIC
+Sanity_lib: libSanity.a
+
+libSanity.a: calc_true_variation_parallel_prior_mu_sigma.o ReadInputFiles.o FitFrac.o FukushimaLambertW.o Digamma_Trigamma.o
+	ar rcs libSanity.a calc_true_variation_parallel_prior_mu_sigma.o ReadInputFiles.o FitFrac.o FukushimaLambertW.o Digamma_Trigamma.o
+	cp libSanity.a ../../
+
 calc_true_variation_parallel_prior_mu_sigma.o: calc_true_variation_parallel_prior_mu_sigma.cpp ReadInputFiles.h FitFrac.h FukushimaLambertW.h Digamma_Trigamma.h
 	$(CC) $(CFLAGS) -c calc_true_variation_parallel_prior_mu_sigma.cpp
 
