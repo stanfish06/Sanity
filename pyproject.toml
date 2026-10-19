@@ -35,13 +35,25 @@ dev = [
   "scikit-build-core>=0.11",
   "ty>=0.0.89",
 ]
+docs = [
+  "furo>=2025.12.19",
+  "sphinx>=9.0.4",
+]
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+cmake.version = ">=3.26"
+wheel.py-api = "cp311"
+wheel.packages = [ "src/pysanity" ]
+wheel.exclude = [ "pysanity/tests", "pysanity/*.cpp", "pysanity/*.h", "pysanity/*.pyx" ]
 
 [tool.uv]
-package = false
+package = true
+cache-keys = [ { file = "pyproject.toml" }, { file = "CMakeLists.txt" }, { file = "src/**/*.{cpp,cc,h,hpp,pyx}" } ]
 
 [tool.ruff]
 # dont format upstream python
-extend-exclude = [ "*.md", "reproducibility", "scripts", "tests" ]
+extend-exclude = [ "*.md", "reproducibility/*", "scripts/*", "tests/*" ]
 force-exclude = true
 format.indent-style = "space"
 format.quote-style = "double"
@@ -55,7 +67,7 @@ keep_full_version = false
 max_supported_python = "3.14"
 
 [tool.ty]
-src = { include = [ "python" ] }
+src = { include = [ "src/pysanity" ] }
 
 [tool.pytest]
-testpaths = [ "python/tests" ]
+testpaths = [ "src/pysanity/tests" ]

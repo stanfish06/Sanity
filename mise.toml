@@ -4,6 +4,8 @@ lefthook = "latest"
 
 [settings]
 python.uv_venv_auto = true
+# uv owns python via .python-version; stop mise from building it with pyenv
+idiomatic_version_file_enable_tools = []
 
 [tasks.build-cli]
 dir = "{{config_root}}/src"
@@ -15,6 +17,13 @@ run = "uv run python compare.py"
 
 [tasks.sync]
 run = "uv sync --all-groups"
+
+[tasks.build]
+run = "uv sync --all-groups --reinstall-package sanity-py"
+
+[tasks.test]
+depends = ["build-cli"]
+run = "uv run --no-sync pytest"
 
 [tasks.format]
 run = [
