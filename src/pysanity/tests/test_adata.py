@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from anndata import AnnData
+from numba import njit
 from scipy.sparse import csr_matrix
 
 from pysanity import (
@@ -96,3 +97,27 @@ def test_sample(adata):
     X = sample(adata, cell_idx, n_posterior=50)
     assert X.shape == (10, adata.n_vars)
     assert np.all(np.isfinite(X))
+
+
+@njit
+def _seed_numba(seed):
+    # numba keeps its own RNG; it is only seeded from jitted code
+    np.random.seed(seed)
+
+
+def test_sample_accepts_obs_names(adata):
+    sanity(adata, layer="counts", verbose=False)
+    positions = np.array([3, 0, 3])
+    _seed_numba(0)
+    by_position = sample(adata, positions, n_posterior=20)
+    _seed_numba(0)
+    by_name = sample(adata, adata.obs_names[positions], n_posterior=20)
+    np.testing.assert_array_equal(by_position, by_name)
+    with pytest.raises(KeyError, match="not in adata.obs_names"):
+        sample(adata, ["0", "missing"], n_posterior=20)
+
+
+def test_sample_defaults_to_all_cells(adata):
+    sanity(adata, layer="counts", verbose=False)
+    X = sample(adata, n_posterior=5)
+    assert X.shape == (adata.n_obs, adata.n_vars)

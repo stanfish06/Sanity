@@ -45,11 +45,34 @@ minimum-version = "build-system.requires"
 cmake.version = ">=3.26"
 wheel.py-api = "cp311"
 wheel.packages = [ "src/pysanity" ]
-wheel.exclude = [ "pysanity/tests", "pysanity/*.cpp", "pysanity/*.h", "pysanity/*.pyx" ]
+wheel.exclude = [ "pysanity/tests", "pysanity/*.cpp", "pysanity/*.h", "pysanity/*.pyx", "pysanity/.gitignore" ]
+# upstream-only material; the extension needs src/, CMakeLists.txt and LICENSE
+sdist.exclude = [
+  "tests",
+  "reproducibility",
+  "scripts",
+  "bin",
+  "Dockerfile",
+  "variable_rename_proposal.md",
+  "docs/_build"
+]
 
 [tool.uv]
 package = true
 cache-keys = [ { file = "pyproject.toml" }, { file = "CMakeLists.txt" }, { file = "src/**/*.{cpp,cc,h,hpp,pyx}" } ]
+
+[tool.cibuildwheel]
+# abi3 wheel: one CPython build per platform covers 3.11+
+build = "cp311-*"
+skip = "*-musllinux_*"
+build-frontend = "build[uv]"
+test-requires = [ "pytest" ]
+# CLI parity tests skip without bin/Sanity; the AnnData tests need the upstream count table
+test-sources = [ "src/pysanity/tests", "tests/count_table.tsv" ]
+test-command = "pytest -q src/pysanity/tests"
+linux.before-all = "dnf install -y zlib-devel || yum install -y zlib-devel"
+# Homebrew libomp; delocate bundles it into the wheel
+macos.environment = { OpenMP_ROOT = "$(brew --prefix libomp)" }
 
 [tool.ruff]
 # dont format upstream python

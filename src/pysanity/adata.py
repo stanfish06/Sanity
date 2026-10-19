@@ -1,6 +1,7 @@
 import numpy as np
 from anndata import AnnData
 from numba import jit
+from numpy.typing import ArrayLike
 from scipy.sparse import issparse
 
 from .core import VarianceMethod, fit
@@ -146,7 +147,7 @@ def _sample_posterior_predictive_counts(
 
 def sample(
     adata: AnnData,
-    cell_idx: np.ndarray,
+    cell_idx: ArrayLike | None = None,
     scale_before_pca: bool = False,
     n_pca_comps: int | None = None,
     n_posterior: int = 1000,
@@ -168,7 +169,8 @@ def sample(
     adata
         AnnData after :func:`sanity`, with log mean and log var in ``layers`` (or ``obsm``) and library size in ``obs``.
     cell_idx
-        Integer indices of the cells to sample; may repeat, e.g. bootstrap indices.
+        Cells to sample, as integer positions or ``obs_names`` (e.g. a slice of ``adata.obs_names``).
+        May repeat, e.g. bootstrap indices. ``None`` samples every cell in order.
     scale_before_pca
         Z-score each gene with the mean and std of the fitted log mean across cells.
     n_pca_comps
@@ -189,18 +191,29 @@ def sample(
 
     Returns
     -------
-    Array of shape ``len(cell_idx)`` x genes with sampled log fractions,
-    or ``len(cell_idx)`` x n_pcs when projected onto ``varm["PCs"]``.
+    Array of shape ``len(cell_idx)`` (or ``n_obs`` if ``None``) x genes with sampled log fractions,
+    or x n_pcs when projected onto ``varm["PCs"]``.
 
     Raises
     ------
     ValueError
         If ``from_obsm=True`` is combined with ``n_pca_comps``, since ``varm["PCs"]`` is in gene space.
+    KeyError
+        If ``cell_idx`` holds names that are not in ``adata.obs_names``.
     """
     if from_obsm and n_pca_comps is not None:
         raise ValueError(
             "n_pca_comps projects onto varm['PCs'], which needs gene-space layers, not obsm"
         )
+    cell_idx = np.arange(adata.n_obs) if cell_idx is None else np.asarray(cell_idx)
+    if cell_idx.dtype.kind in "OUS":
+        names = cell_idx
+        cell_idx = adata.obs_names.get_indexer(names)
+        if np.any(cell_idx < 0):
+            raise KeyError(
+                f"cells not in adata.obs_names: {list(names[cell_idx < 0][:5])}"
+            )
+    cell_idx = cell_idx.astype(np.int64, copy=False)
     slot = adata.obsm if from_obsm else adata.layers
     log_mean = np.ascontiguousarray(slot[key_log_mean])
     log_var = np.ascontiguousarray(slot[key_log_var])
