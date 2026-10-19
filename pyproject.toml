@@ -71,8 +71,6 @@ test-requires = [ "pytest" ]
 test-sources = [ "src/pysanity/tests", "tests/count_table.tsv" ]
 test-command = "pytest -q src/pysanity/tests"
 linux.before-all = "dnf install -y zlib-devel || yum install -y zlib-devel"
-# Homebrew libomp; delocate bundles it into the wheel
-macos.environment = { OpenMP_ROOT = "$(brew --prefix libomp)" }
 
 [tool.ruff]
 # dont format upstream python

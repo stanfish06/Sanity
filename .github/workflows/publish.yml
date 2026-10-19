@@ -23,7 +23,6 @@ jobs:
             label: linux-x86_64
           - os: ubuntu-24.04-arm
             label: linux-aarch64
-          # Homebrew libomp targets the runner's macOS version, so the wheel must too
           - os: macos-14
             label: macos-arm64
             deployment_target: "14.0"
@@ -42,12 +41,20 @@ jobs:
           # no cache in release builds
           enable-cache: false
 
-      - name: Install libomp
+      # Apple libc++ lacks std::from_chars for double
+      - name: Install GCC
         if: runner.os == 'macOS'
-        run: brew install libomp
+        run: brew install gcc
 
       - name: Build and test wheels
-        run: uvx --from "cibuildwheel>=3,<4" cibuildwheel --output-dir wheelhouse
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            gcc_bin="$(brew --prefix gcc)/bin"
+            major="$(for f in "$gcc_bin"/g++-[0-9]*; do echo "${f##*-}"; done | sort -n | tail -1)"
+            export CC="$gcc_bin/gcc-$major" CXX="$gcc_bin/g++-$major"
+            "$CXX" --version
+          fi
+          uvx --from "cibuildwheel>=3,<4" cibuildwheel --output-dir wheelhouse
         env:
           MACOSX_DEPLOYMENT_TARGET: ${{ matrix.deployment_target }}
 

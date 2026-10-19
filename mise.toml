@@ -21,6 +21,17 @@ run = "uv sync --all-groups"
 [tasks.build]
 run = "uv sync --all-groups --reinstall-package sanity-py"
 
+[tasks.bump]
+run = [
+    "lefthook run pre-bump",
+    "uv version --bump patch",
+    "git add uv.lock pyproject.toml",
+    'git commit -m "new tag"',
+    "git tag v$(uv version --short)",
+    "git push --tags",
+    "git push",
+]
+
 [tasks.docs]
 run = "uv run --no-sync sphinx-build -W --keep-going docs docs/_build/html"
 
