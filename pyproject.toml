@@ -77,7 +77,8 @@ windows.archs = [ "AMD64" ]
 # static zlib with the dynamic CRT, so delvewheel only bundles vcomp140.dll
 windows.before-all = "vcpkg install zlib:x64-windows-static-md"
 # use vcpkg's toolchain so find_package(ZLIB) resolves the static lib name (zs.lib)
-windows.environment = { SKBUILD_CMAKE_ARGS = "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake;-DVCPKG_TARGET_TRIPLET=x64-windows-static-md" }
+# stop lingering MSBuild nodes from locking the temp build dir during cleanup
+windows.environment = { SKBUILD_CMAKE_ARGS = "-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake;-DVCPKG_TARGET_TRIPLET=x64-windows-static-md", MSBUILDDISABLENODEREUSE = "1" }
 windows.repair-wheel-command = "uvx delvewheel repair -w {dest_dir} {wheel}"
 
 [tool.ruff]
