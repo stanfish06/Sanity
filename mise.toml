@@ -27,8 +27,8 @@ run = [
     "uv version --bump patch",
     "git add uv.lock pyproject.toml",
     'git commit -m "new tag"',
-    "git tag v$(uv version --short)",
-    "git push --tags",
+    "git tag py-v$(uv version --short)",
+    "git push origin py-v$(uv version --short)",
     "git push",
 ]
 

@@ -3,7 +3,7 @@ name: Publish
 on:
   push:
     tags:
-      - "v*"
+      - "py-v*"
   # build and test wheels without uploading
   workflow_dispatch:
 
@@ -81,12 +81,12 @@ jobs:
           enable-cache: false
 
       - name: Check tag matches project version
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/py-v')
         env:
           TAG: ${{ github.ref_name }}
         run: |
           version="$(uv version --short)"
-          if [ "${TAG#v}" != "$version" ]; then
+          if [ "${TAG#py-v}" != "$version" ]; then
             echo "tag $TAG does not match pyproject version $version" >&2
             exit 1
           fi
@@ -101,7 +101,7 @@ jobs:
           path: dist/*.tar.gz
 
   publish:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/py-v')
     needs:
       - build-wheels
       - build-sdist
