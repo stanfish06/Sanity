@@ -1,0 +1,61 @@
+[build-system]
+build-backend = "scikit_build_core.build"
+requires = [ "cython>=3.1", "numpy>=2", "scikit-build-core>=0.11" ]
+
+[project]
+name = "sanity-py"
+version = "0.1.0"
+description = "Python bindings for Sanity (SAmpling-Noise-corrected Inference of Transcription ActivitY)"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = [ "LICENSE" ]
+authors = [
+  { name = "Zhiyuan(Stan) Yu", email = "zyyu@umich.edu" },
+]
+requires-python = ">=3.11"
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+  "anndata>=0.10",
+  "numba>=0.60",
+  "numpy>=1.26",
+  "scipy>=1.13",
+]
+
+[dependency-groups]
+dev = [
+  "cython>=3.1",
+  "pytest>=9.1.1",
+  "ruff>=0.17.1",
+  "scikit-build-core>=0.11",
+  "ty>=0.0.89",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+# dont format upstream python
+extend-exclude = [ "*.md", "reproducibility", "scripts", "tests" ]
+force-exclude = true
+format.indent-style = "space"
+format.quote-style = "double"
+lint.extend-select = [ "I" ]
+lint.fixable = [ "ALL" ]
+
+[tool.pyproject-fmt]
+column_width = 120
+indent = 2
+keep_full_version = false
+max_supported_python = "3.14"
+
+[tool.ty]
+src = { include = [ "python" ] }
+
+[tool.pytest]
+testpaths = [ "python/tests" ]
