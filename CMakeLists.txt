@@ -9,8 +9,15 @@ find_package(Python REQUIRED COMPONENTS Interpreter Development.Module ${SKBUILD
 find_package(OpenMP REQUIRED COMPONENTS CXX)
 find_package(ZLIB REQUIRED)
 
-# upstream flags minus -march=native and -flto so wheels stay portable
-set(SANITY_FLAGS -O3 -fno-math-errno)
+if(MSVC)
+  # use MSVC names for the POSIX/GNU symbols upstream relies on
+  set(SANITY_FLAGS "")
+  set(SANITY_DEFS _USE_MATH_DEFINES strtok_r=strtok_s)
+else()
+  # upstream flags minus -march=native and -flto so wheels stay portable
+  set(SANITY_FLAGS -O3 -fno-math-errno)
+  set(SANITY_DEFS "")
+endif()
 
 # upstream sources except the CLI translation unit, which _sanity.cpp includes
 add_library(sanity_upstream STATIC
@@ -23,6 +30,7 @@ add_library(sanity_upstream STATIC
 )
 target_include_directories(sanity_upstream PUBLIC src)
 target_compile_options(sanity_upstream PRIVATE ${SANITY_FLAGS})
+target_compile_definitions(sanity_upstream PUBLIC ${SANITY_DEFS})
 target_link_libraries(sanity_upstream PUBLIC OpenMP::OpenMP_CXX ZLIB::ZLIB)
 
 set(PYX ${CMAKE_CURRENT_SOURCE_DIR}/src/pysanity/_core.pyx)

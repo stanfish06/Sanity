@@ -73,6 +73,11 @@ test-requires = [ "pytest" ]
 test-sources = [ "src/pysanity/tests", "tests/count_table.tsv" ]
 test-command = "pytest -q src/pysanity/tests"
 linux.before-all = "dnf install -y zlib-devel || yum install -y zlib-devel"
+windows.archs = [ "AMD64" ]
+# static zlib with the dynamic CRT, so delvewheel only bundles vcomp140.dll
+windows.before-all = "vcpkg install zlib:x64-windows-static-md"
+windows.environment = { SKBUILD_CMAKE_ARGS = "-DZLIB_ROOT=C:/vcpkg/installed/x64-windows-static-md" }
+windows.repair-wheel-command = "uvx delvewheel repair -w {dest_dir} {wheel}"
 
 [tool.ruff]
 # dont format upstream python
